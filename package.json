@@ -19,7 +19,7 @@
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
   },
-  "overrides": {
-    "vue": "latest"
+  "devDependencies": {
+    "daisyui": "^5.1.6"
   }
 }

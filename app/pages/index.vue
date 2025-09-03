@@ -22,14 +22,12 @@ const { files, currentFileIndex } = storeToRefs(userStore);
 const router = useRouter();
 
 function createNewFile() {
-  const newFile = {
+  files.value.push({
     name: "Untitled File",
     code: "",
     lastSaved: Date.now(),
     lastOpened: Date.now(),
-  } satisfies CodeFile;
-
-  files.value.push(newFile);
+  });
   currentFileIndex.value = files.value.length - 1;
   router.push("/editor");
 }

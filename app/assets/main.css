@@ -1,5 +1,17 @@
 @import "tailwindcss";
+@plugin "daisyui" {
+  prefix: "du-";
+  logs: false;
+}
 
 html {
-  @apply bg-neutral-900 overflow-hidden;
+  @apply bg-neutral-900 overflow-hidden text-white;
+}
+
+button {
+  @apply cursor-pointer;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
 }
