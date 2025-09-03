@@ -25,7 +25,10 @@
         v-for="file in files"
         :key="file.uuid"
         class="group hover:bg-neutral-700 transition w-full py-2 pl-4 pr-2 rounded-xl flex items-center justify-between"
-        :class="{ 'bg-neutral-700/75': file.uuid === currentUuid }"
+        :class="{
+          'bg-neutral-700/75': file.uuid === currentUuid,
+          'bg-neutral-700/50': file.uuid === currentlyEditingUuid,
+        }"
       >
         <input
           ref="file-name-input"
