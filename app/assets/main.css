@@ -4,6 +4,10 @@
   logs: false;
 }
 
+* {
+  font-family: Comic Sans MS;
+}
+
 html {
   @apply bg-neutral-900 overflow-hidden text-white;
 }

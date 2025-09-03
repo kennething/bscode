@@ -127,8 +127,4 @@ const stopInitialWatcher = watch(
 );
 </script>
 
-<style scoped>
-* {
-  font-family: Comic Sans MS;
-}
-</style>
+<style scoped></style>
