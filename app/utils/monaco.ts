@@ -3,9 +3,22 @@ import * as monaco from "monaco-editor";
 // Tell Monaco how to load its workers
 self.MonacoEnvironment = {
   getWorker(_, label) {
-    if (label === "typescript" || label === "javascript") return new Worker(new URL("monaco-editor/esm/vs/language/typescript/ts.worker?worker", import.meta.url), { type: "module" });
+    if (label === "typescript" || label === "javascript")
+      return new Worker(
+        new URL(
+          "@/../node_modules/monaco-editor/esm/vs/language/typescript/ts.worker?worker",
+          import.meta.url
+        ),
+        { type: "module" }
+      );
 
-    return new Worker(new URL("monaco-editor/esm/vs/editor/editor.worker?worker", import.meta.url), { type: "module" });
+    return new Worker(
+      new URL(
+        "@/../node_modules/monaco-editor/esm/vs/editor/editor.worker?worker",
+        import.meta.url
+      ),
+      { type: "module" }
+    );
   },
 };
 
