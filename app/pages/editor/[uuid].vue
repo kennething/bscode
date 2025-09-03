@@ -27,17 +27,22 @@
 </template>
 
 <script setup lang="ts">
-import type { editor } from "monaco-editor";
+import { editor } from "monaco-editor";
 
 const userStore = useUserStore();
-const { files, currentFileIndex } = storeToRefs(userStore);
+const { files } = storeToRefs(userStore);
+const route = useRoute();
 const router = useRouter();
 
-onBeforeMount(() => {
-  if (currentFileIndex.value === undefined) {
-    if (!files.value.length) return router.replace("/");
-    currentFileIndex.value = 0;
-  }
+const uuid = String(route.params.uuid);
+
+const currentFile = computed(() => {
+  if (!uuid) return void router.replace("/");
+
+  const file = files.value[uuid];
+  if (!file) return void router.replace("/");
+
+  return file;
 });
 
 const editorContainer = useTemplateRef("editor-container");
@@ -45,11 +50,10 @@ const sandboxFrame = useTemplateRef("sandbox-frame");
 const monacoEditor = shallowRef<editor.IStandaloneCodeEditor>();
 
 const run = ref(false);
-const code = ref("");
 const iframeCode = ref("");
 
 async function saveCode() {
-  if (!monacoEditor.value || currentFileIndex.value === undefined) return;
+  if (!monacoEditor.value) return;
 
   let code = monacoEditor.value.getValue();
   if (!code.endsWith("\n")) {
@@ -58,22 +62,12 @@ async function saveCode() {
     monacoEditor.value.setValue(code);
     if (position) monacoEditor.value.setPosition(position);
   }
-  userStore.saveCode(currentFileIndex.value, code);
+  userStore.saveCode(uuid, code);
 }
-
-function handleHotkeys(event: KeyboardEvent) {
-  if (event.ctrlKey && event.key === "s") {
-    console.log("a");
-    event.preventDefault();
-    saveCode();
-  }
-}
-onMounted(() => window.addEventListener("keypress", handleHotkeys));
-onUnmounted(() => window.removeEventListener("keypress", handleHotkeys));
 
 function initializeEditor() {
   monacoEditor.value = monaco.editor.create(editorContainer.value!, {
-    value: files.value[currentFileIndex.value ?? 0]?.code,
+    value: currentFile.value?.code,
     language: "javascript",
     theme: "vs-dark",
   });
@@ -121,13 +115,15 @@ function initializeEditor() {
   //   },
   // });
 }
-watch(
-  editorContainer,
+const stopInitialWatcher = watch(
+  [editorContainer, currentFile],
   () => {
-    initializeEditor();
-    watch(currentFileIndex, initializeEditor);
+    if (editorContainer.value && currentFile.value) {
+      initializeEditor();
+      stopInitialWatcher();
+    }
   },
-  { once: true }
+  { immediate: true }
 );
 </script>
 

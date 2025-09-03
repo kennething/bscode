@@ -1,18 +1,17 @@
 export const useUserStore = defineStore("userStore", () => {
-  const router = useRouter();
+  /** { [`uuid`]: `CodeFile` } */
+  const files = ref<Record<string, CodeFile>>({});
 
-  const files = ref<CodeFile[]>([]);
-  const currentFileIndex = ref<number>();
-
-  function saveCode(index: number, code?: string) {
-    files.value[index]!.code = code ?? files.value[index]!.code;
+  function saveCode(uuid: string, code?: string) {
+    files.value[uuid]!.code = code ?? files.value[uuid]!.code;
+    files.value[uuid]!.lastSaved = Date.now();
     localStorage.setItem("files", JSON.stringify(files.value));
   }
 
-  function deleteFile(index: number) {
-    files.value.splice(index, 1);
+  function deleteFile(uuid: string) {
+    delete files.value[uuid];
     localStorage.setItem("files", JSON.stringify(files.value));
   }
 
-  return { files, currentFileIndex, saveCode, deleteFile };
+  return { files, saveCode, deleteFile };
 });

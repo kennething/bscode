@@ -28,7 +28,7 @@ export const consoleTooltips = {
       },
       {
         value:
-          'The `console.warn()` static method outputs a warning message to the console at the "warning" log level. The message receives special formatting in the form of yellow colors and a warning icon.',
+          'The `console.warn()` static method outputs a warning message to the console at the "warning" log level. The message receives special formatting in the form of a yellow background.',
       },
     ],
   },
@@ -40,7 +40,7 @@ export const consoleTooltips = {
       },
       {
         value:
-          'The `console.error()` static method outputs a message to the console at the "error" log level. The message receives special formatting in the form of red colors and call stack information.',
+          'The `console.error()` static method outputs a message to the console at the "error" log level. The message receives special formatting in the form of a red background.',
       },
     ],
   },

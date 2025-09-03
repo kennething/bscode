@@ -20,37 +20,39 @@
     </div>
 
     <div class="w-full h-full no-scrollbar">
-      <div
-        tabindex="0"
-        role="button"
-        v-for="(file, index) in files"
-        class="cursor-pointer group hover:bg-neutral-700 transition w-full py-2 pl-4 pr-2 rounded-xl flex items-center justify-between"
-        :class="{ 'bg-neutral-700/75': currentFileIndex === index }"
-        @click="currentFileIndex = index"
+      <NuxtLink
+        :to="`/editor/${file.uuid}`"
+        v-for="file in files"
+        :key="file.uuid"
+        class="group hover:bg-neutral-700 transition w-full py-2 pl-4 pr-2 rounded-xl flex items-center justify-between"
+        :class="{ 'bg-neutral-700/75': file.uuid === currentUuid }"
       >
         <input
           ref="file-name-input"
           class="w-46"
           :class="{ 'outline-red-300': !nameIsValid }"
-          v-show="currentlyEditingIndex === index"
+          v-show="file.uuid === currentlyEditingUuid"
           type="text"
           v-model="fileNameInputValue"
           @keydown.enter="submitNewFileName()"
           @blur="submitNewFileName(true)"
-          @focus="console.log(currentlyEditingIndex)"
+          @click.stop.prevent
         />
         <p
-          v-show="currentlyEditingIndex !== index"
+          v-show="file.uuid !== currentlyEditingUuid"
           class="w-48 truncate text-left"
         >
-          {{ file.name }}
+          {{ file.name }}.{{ languages[file.language] }}
         </p>
 
-        <div class="du-tooltip ml-auto" data-tip="Rename file">
+        <div
+          class="du-tooltip ml-auto group-hover:opacity-100 opacity-0 transition"
+          data-tip="Rename file"
+        >
           <button
             class="hover:bg-neutral-600 p-1 transition rounded-lg"
             type="button"
-            @click.stop="editFileName(index)"
+            @click.stop.prevent="editFileName(file.uuid)"
           >
             <img
               class="size-5 invert"
@@ -60,11 +62,14 @@
           </button>
         </div>
 
-        <div class="du-tooltip" data-tip="Delete file">
+        <div
+          class="du-tooltip group-hover:opacity-100 opacity-0 transition"
+          data-tip="Delete file"
+        >
           <button
             class="hover:bg-neutral-600 p-1 transition rounded-lg"
             type="button"
-            @click.stop="currentlyDeletingIndex = index"
+            @click.stop.prevent="currentlyDeletingUuid = file.uuid"
           >
             <img
               class="size-5 invert"
@@ -73,7 +78,7 @@
             />
           </button>
         </div>
-      </div>
+      </NuxtLink>
     </div>
   </div>
 
@@ -81,8 +86,8 @@
     <Transition>
       <div
         class="w-dvw h-dvh bg-black/35 flex items-center justify-center fixed top-0 left-0 z-50"
-        v-if="currentlyDeletingIndex !== undefined"
-        @click="currentlyDeletingIndex = undefined"
+        v-if="currentlyDeletingUuid !== undefined"
+        @click="currentlyDeletingUuid = undefined"
       >
         <div
           class="menu bg-neutral-800 flex items-center justify-center flex-col p-10 gap-4 rounded-lg shadow-lg relative"
@@ -91,7 +96,7 @@
           <button
             class="absolute top-2 right-2 p-1 rounded-full hover:bg-neutral-700 transition"
             type="button"
-            @click="currentlyDeletingIndex = undefined"
+            @click="currentlyDeletingUuid = undefined"
           >
             <img
               class="size-6 invert"
@@ -103,7 +108,7 @@
           <h3 class="text-xl text-red-400 font-medium">
             Are you sure you want to delete
             <span class="text-red-400 text-xl font-semibold">{{
-              files[currentlyDeletingIndex]?.name ?? "this file"
+              files[currentlyDeletingUuid]?.name ?? "this file"
             }}</span
             >?
           </h3>
@@ -113,14 +118,14 @@
             <button
               class="bg-neutral-300 text-black rounded-full px-7 py-2 hover:bg-neutral-200 transition"
               type="button"
-              @click="currentlyDeletingIndex = undefined"
+              @click="currentlyDeletingUuid = undefined"
             >
               Cancel
             </button>
             <button
               class="rounded-full px-7 py-2 hover:bg-red-600 transition"
               type="button"
-              @click="userStore.deleteFile(currentlyDeletingIndex)"
+              @click="deleteFile"
             >
               Delete
             </button>
@@ -132,23 +137,29 @@
 </template>
 
 <script setup lang="ts">
-import { Teleport } from "vue";
+import { v4 } from "uuid";
 
 const userStore = useUserStore();
-const { files, currentFileIndex } = storeToRefs(userStore);
+const { files } = storeToRefs(userStore);
+const route = useRoute();
+const router = useRouter();
 
-const currentlyEditingIndex = ref<number>();
+const currentUuid = String(route.params.uuid);
+
+const currentlyEditingUuid = ref<string>();
 const fileNameInput = useTemplateRef("file-name-input");
-watch(currentlyEditingIndex, async (val, previousVal) => {
+watch(currentlyEditingUuid, async (val, previousVal) => {
   if (val !== undefined) {
     await nextTick();
-    fileNameInput.value?.[val]?.focus();
+    const fileIndex = Object.keys(files.value).findIndex((f) => f === val);
+    fileNameInput.value?.[fileIndex]?.focus();
   } else {
     userStore.saveCode(previousVal!);
   }
 });
 
-const currentlyDeletingIndex = ref<number>();
+const isCreatingNewFile = ref(false);
+const currentlyDeletingUuid = ref<string>();
 
 const fileNameInputValue = ref("");
 const nameIsValid = computed(() => {
@@ -157,34 +168,62 @@ const nameIsValid = computed(() => {
   return true;
 });
 
-function editFileName(index: number) {
-  fileNameInputValue.value = files.value[index]!.name;
-  currentlyEditingIndex.value = index;
+function editFileName(uuid: string) {
+  fileNameInputValue.value = files.value[uuid]!.name;
+  currentlyEditingUuid.value = uuid;
 }
 
 function submitNewFileName(once = false) {
-  if (!fileNameInput.value || currentlyEditingIndex.value === undefined) return;
+  if (!fileNameInput.value || currentlyEditingUuid.value === undefined) return;
   if (!nameIsValid.value) {
-    if (!once) return fileNameInput.value[currentlyEditingIndex.value]?.focus();
-    currentlyEditingIndex.value = undefined;
+    if (!once || isCreatingNewFile.value) {
+      const fileIndex = Object.keys(files.value).findIndex(
+        (f) => f === currentlyEditingUuid.value
+      );
+      return fileNameInput.value[fileIndex]?.focus();
+    }
+
+    currentlyEditingUuid.value = undefined;
     fileNameInputValue.value = "";
     return;
   }
 
-  files.value[currentlyEditingIndex.value]!.name =
+  files.value[currentlyEditingUuid.value]!.name =
     fileNameInputValue.value.trim();
-  currentlyEditingIndex.value = undefined;
+  currentlyEditingUuid.value = undefined;
   fileNameInputValue.value = "";
+  isCreatingNewFile.value = false;
 }
 
 function createNewFile() {
-  files.value.unshift({
+  const uuid = v4();
+  files.value[uuid] = {
+    uuid,
     name: "",
     code: "",
     lastSaved: Date.now(),
-    lastOpened: Date.now(),
-  });
-  currentlyEditingIndex.value = 0;
+    language: "JavaScript",
+    createdAt: Date.now(),
+  };
+  isCreatingNewFile.value = true;
+  currentlyEditingUuid.value = uuid;
+}
+
+function deleteFile() {
+  if (currentlyDeletingUuid.value === undefined) return;
+
+  const file = files.value[currentlyDeletingUuid.value];
+  if (!file) return;
+
+  userStore.deleteFile(currentlyDeletingUuid.value);
+
+  if (file.uuid === route.params.uuid) {
+    if (files.value.length)
+      return router.push(`/editor/${files.value[0]!.uuid}`);
+    router.push("/");
+  }
+
+  currentlyDeletingUuid.value = undefined;
 }
 </script>
 
