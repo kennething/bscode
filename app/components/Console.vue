@@ -101,7 +101,7 @@ async function runCode() {
   emit("saveCode");
   if (!props.editor || !props.currentFile) return;
 
-  bsConsole.value = [new Message("log", '"Starting execution..."')];
+  bsConsole.value = [new Message("log", "Starting execution...")];
 
   let code = props.editor.getValue();
   if (props.currentFile.language === "TypeScript")
@@ -183,6 +183,7 @@ onMounted(() => window.addEventListener("keypress", handleHotkeys));
 onUnmounted(() => window.removeEventListener("keypress", handleHotkeys));
 
 function copyOutput(log: Message) {
+  console.log(log.message);
   navigator.clipboard.writeText(log.message);
   log.wasCopied = true;
   setTimeout(() => (log.wasCopied = false), 2000);
