@@ -72,20 +72,20 @@ function initializeEditor() {
     theme: "vs-dark",
   });
 
-  monaco.languages.registerHoverProvider("javascript", {
-    provideHover: (model, position) => {
-      const word = model.getWordAtPosition(position);
-      if (!word) return null;
+  // monaco.languages.registerHoverProvider("javascript", {
+  //   provideHover: (model, position) => {
+  //     const word = model.getWordAtPosition(position);
+  //     if (!word) return null;
 
-      const lineText = model.getLineContent(position.lineNumber);
+  //     const lineText = model.getLineContent(position.lineNumber);
 
-      const consoleTooltip = insertConsoleTooltips(word.word, lineText);
-      if (consoleTooltip) return consoleTooltip;
+  //     const consoleTooltip = insertConsoleTooltips(word.word, lineText);
+  //     if (consoleTooltip) return consoleTooltip;
 
-      const mathTooltip = insertMathTooltips(word.word, lineText);
-      if (mathTooltip) return mathTooltip;
-    },
-  });
+  //     const mathTooltip = insertMathTooltips(word.word, lineText);
+  //     if (mathTooltip) return mathTooltip;
+  //   },
+  // });
 
   // monaco.languages.registerCompletionItemProvider("javascript", {
   //   triggerCharacters: ["."],
