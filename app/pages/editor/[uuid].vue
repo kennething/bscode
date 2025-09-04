@@ -16,6 +16,7 @@
       <div ref="editor-container" class="w-full h-full"></div>
 
       <Console
+        :current-file="currentFile"
         :sandbox-frame="sandboxFrame"
         :editor="monacoEditor"
         @update-iframe-code="(code) => (iframeCode = code)"

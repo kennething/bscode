@@ -14,8 +14,9 @@ export class Message {
 
 export const languages = {
   JavaScript: "js",
+  TypeScript: "ts",
 } as const satisfies Record<string, string>;
-type Language = keyof typeof languages;
+export type Language = keyof typeof languages;
 
 export type CodeFile = {
   uuid: string;

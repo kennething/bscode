@@ -77,6 +77,7 @@
 import type { editor } from "monaco-editor";
 
 const props = defineProps<{
+  currentFile: CodeFile | undefined;
   sandboxFrame: HTMLIFrameElement | null;
   editor: editor.IStandaloneCodeEditor | undefined;
 }>();
@@ -93,9 +94,18 @@ async function runCode() {
   await nextTick();
 
   emit("saveCode");
-  if (!props.editor) return;
+  if (!props.editor || !props.currentFile) return;
 
   bsConsole.value = [new Message("log", '"Starting execution..."')];
+
+  let code = props.editor.getValue();
+  if (props.currentFile.language === "TypeScript")
+    code = (
+      await $fetch("/api/transpileTs", {
+        method: "POST",
+        body: { code },
+      })
+    ).code;
 
   emit(
     "updateIframeCode",
@@ -120,7 +130,7 @@ async function runCode() {
 
     <script>
       try {
-        ${props.editor.getValue()}
+        ${code}
       } catch (error) {
         console.error(String(error));
       }
