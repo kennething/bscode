@@ -40,7 +40,12 @@
         <span class="font-bold"
           >[{{ log.timestamp.toLocaleTimeString() }}]</span
         >
-        {{ log.message.slice(1, log.message.length - 1) }}
+        {{
+          log.message.startsWith('"') && log.message.endsWith('"')
+            ? log.message.slice(1, log.message.length - 1)
+            : log.message
+        }}
+        {{ console.log(log.message) }}
 
         <div
           class="absolute -top-2 right-2 du-tooltip shadow-lg transition du-tooltip-left group-hover/output:opacity-100 opacity-0 pointer-events-none group-hover/output:pointer-events-auto"
@@ -145,7 +150,11 @@ function catchConsole(event: MessageEvent) {
   if (event.source !== props.sandboxFrame?.contentWindow) return;
 
   const { type, message } = event.data as Message;
-  bsConsole.value.push(new Message(type, message));
+  const parsedMessage =
+    message.startsWith('"') && message.endsWith('"')
+      ? message.slice(1, message.length - 1)
+      : message;
+  bsConsole.value.push(new Message(type, parsedMessage));
 }
 onMounted(() => window.addEventListener("message", catchConsole));
 onUnmounted(() => window.removeEventListener("message", catchConsole));
@@ -174,7 +183,7 @@ onMounted(() => window.addEventListener("keypress", handleHotkeys));
 onUnmounted(() => window.removeEventListener("keypress", handleHotkeys));
 
 function copyOutput(log: Message) {
-  navigator.clipboard.writeText(log.message.slice(1, log.message.length - 1));
+  navigator.clipboard.writeText(log.message);
   log.wasCopied = true;
   setTimeout(() => (log.wasCopied = false), 2000);
 }
