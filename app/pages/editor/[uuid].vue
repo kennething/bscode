@@ -69,7 +69,10 @@ async function saveCode() {
 function initializeEditor() {
   monacoEditor.value = monaco.editor.create(editorContainer.value!, {
     value: currentFile.value?.code,
-    language: "javascript",
+    language:
+      currentFile.value?.language === "TypeScript"
+        ? "typescript"
+        : "javascript",
     theme: "vs-dark",
   });
 
