@@ -25,11 +25,11 @@
     </div>
 
     <div
-      class="w-full h-[calc(100dvh-6rem)] grow-0 p-2 no-scrollbar overflow-scroll"
+      class="w-full h-[calc(100dvh-6rem)] grow-0 p-2 no-scrollbar overflow-scroll text-nowrap"
     >
       <div
         v-for="log in bsConsole"
-        class="py-1 px-2 group/output my-1 rounded-lg transition relative"
+        class="py-1 px-2 group/output my-1 rounded-lg transition relative overflow-x-scroll"
         :class="{
           'hover:bg-neutral-700': log.type === 'log',
           'bg-yellow-500/25 hover:bg-yellow-500/40': log.type === 'warn',
@@ -50,7 +50,7 @@
         </p>
 
         <div
-          class="absolute -top-2 right-2 du-tooltip shadow-lg transition du-tooltip-left group-hover/output:opacity-100 opacity-0 pointer-events-none group-hover/output:pointer-events-auto"
+          class="absolute top-1 right-2 du-tooltip shadow-lg transition du-tooltip-left group-hover/output:opacity-100 opacity-0 pointer-events-none group-hover/output:pointer-events-auto"
           :data-tip="
             log.wasCopied
               ? 'Copied!'
@@ -159,7 +159,9 @@ function catchConsole(event: MessageEvent) {
     message.startsWith('"') && message.endsWith('"')
       ? message.slice(1, message.length - 1)
       : message
-  ).split("\\n");
+  )
+    .split("\\n")
+    .map((msg) => msg.replaceAll("\\", ""));
   bsConsole.value.push(new Message(type, parsedMessage));
 }
 onMounted(() => window.addEventListener("message", catchConsole));
