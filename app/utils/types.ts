@@ -1,10 +1,11 @@
 export class Message {
   type: "log" | "warn" | "error";
-  message: string;
+  /** Array of message strings, split at each newline */
+  message: string[];
   timestamp: Date;
   wasCopied: boolean;
 
-  constructor(type: "log" | "warn" | "error", message: string) {
+  constructor(type: "log" | "warn" | "error", message: string[]) {
     this.type = type;
     this.message = message;
     this.timestamp = new Date();

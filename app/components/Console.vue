@@ -40,12 +40,14 @@
         <span class="font-bold"
           >[{{ log.timestamp.toLocaleTimeString() }}]</span
         >
-        {{
-          log.message.startsWith('"') && log.message.endsWith('"')
-            ? log.message.slice(1, log.message.length - 1)
-            : log.message
-        }}
-        {{ console.log(log.message) }}
+        {{ log.message[0] }}
+        <p
+          class="h-6"
+          v-if="log.message.length"
+          v-for="line in log.message.slice(1)"
+        >
+          {{ line }}
+        </p>
 
         <div
           class="absolute -top-2 right-2 du-tooltip shadow-lg transition du-tooltip-left group-hover/output:opacity-100 opacity-0 pointer-events-none group-hover/output:pointer-events-auto"
@@ -101,7 +103,7 @@ async function runCode() {
   emit("saveCode");
   if (!props.editor || !props.currentFile) return;
 
-  bsConsole.value = [new Message("log", "Starting execution...")];
+  bsConsole.value = [new Message("log", ["Starting execution..."])];
 
   let code = props.editor.getValue();
   if (props.currentFile.language === "TypeScript")
@@ -149,11 +151,15 @@ async function runCode() {
 function catchConsole(event: MessageEvent) {
   if (event.source !== props.sandboxFrame?.contentWindow) return;
 
-  const { type, message } = event.data as Message;
-  const parsedMessage =
+  const { type, message } = event.data as {
+    type: "log" | "warn" | "error";
+    message: string;
+  };
+  const parsedMessage = (
     message.startsWith('"') && message.endsWith('"')
       ? message.slice(1, message.length - 1)
-      : message;
+      : message
+  ).split("\\n");
   bsConsole.value.push(new Message(type, parsedMessage));
 }
 onMounted(() => window.addEventListener("message", catchConsole));
@@ -184,7 +190,7 @@ onUnmounted(() => window.removeEventListener("keypress", handleHotkeys));
 
 function copyOutput(log: Message) {
   console.log(log.message);
-  navigator.clipboard.writeText(log.message);
+  navigator.clipboard.writeText(log.message.join("\n"));
   log.wasCopied = true;
   setTimeout(() => (log.wasCopied = false), 2000);
 }
