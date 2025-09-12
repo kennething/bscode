@@ -13,7 +13,7 @@
     <div class="w-full h-full flex items-center justify-center">
       <FileExplorer />
 
-      <div ref="editor-container" class="w-full h-full"></div>
+      <div ref="editor-container" class="editor w-full h-full"></div>
 
       <Console
         :current-file="currentFile"
@@ -131,4 +131,8 @@ const stopInitialWatcher = watch(
 );
 </script>
 
-<style scoped></style>
+<style scoped>
+.editor * {
+  font-family: "Google Sans Code", monospace !important;
+}
+</style>
