@@ -46,6 +46,11 @@ const currentFile = computed(() => {
   return file;
 });
 
+useHead({
+  title: () =>
+    `${currentFile.value?.name ?? "Untitled File"}.${currentFile.value ? languages[currentFile.value.language] : ""} - BS Code`,
+});
+
 const editorContainer = useTemplateRef("editor-container");
 const sandboxFrame = useTemplateRef("sandbox-frame");
 const monacoEditor = shallowRef<editor.IStandaloneCodeEditor>();
