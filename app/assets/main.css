@@ -14,7 +14,7 @@
 }
 
 html {
-  @apply bg-neutral-900 overflow-hidden text-white;
+  @apply bg-neutral-900 text-white;
 }
 
 button {
