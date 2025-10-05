@@ -1,6 +1,5 @@
 import * as monaco from "monaco-editor";
 
-// Tell Monaco how to load its workers
 self.MonacoEnvironment = {
   getWorker(_, label) {
     if (label === "typescript" || label === "javascript")
